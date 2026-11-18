@@ -1,1 +1,6 @@
-[{"name":"1-chase.jpg","query":"?shot=chase"},{"name":"2-city.jpg","query":"?shot=city"},{"name":"3-mission.jpg","query":"?shot=mission"},{"name":"4-start.jpg","query":"?shot=start"}]
+[
+  {"file":"1-chase.jpg","query":"?shot=1","title":"Last Crossing — bridge override"},
+  {"file":"2-title.jpg","query":"?shot=2","title":"The crew — continue Day 3"},
+  {"file":"3-mission.jpg","query":"?shot=3","title":"Last Crossing — on foot"},
+  {"file":"4-map.jpg","query":"?shot=4","title":"City atlas — Harbor Keys unlocked"}
+]

@@ -1,21 +1,15 @@
-# kilat-bay-last-crossing
+# KILAT BAY — The Last Crossing
 
-[![make.fun bounty](https://make.fun/badge/gta6-01.svg?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
-[![rank](https://make.fun/badge/gta6-01/durov001/kilat-bay-last-crossing/rank.svg?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
-[![reward](https://make.fun/badge/gta6-01/durov001/kilat-bay-last-crossing/reward.svg?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+A fresh modular three.js open-world crime game set in a sun-soaked coastal city. Kirana has the payroll, the department has the roads, and Harbor Cut has one lift left.
 
-**KILAT BAY: LAST CROSSING** is a storm-night 3D open-world crime game set in a neon coastal city. Drive the KILAT GT through rain-slick streets, steal cars, outrun the KBPD across five districts, and finish all eight missions — ending with a desperate escape across the Harbor Cut drawbridge as its leaves rise and cut the pursuit off behind you. Everything runs from static files: three.js rendering, procedural city, Web Audio synth sound, and save progress in the browser.
+Run `node serve.ts` and open the printed local URL. Continue loads the finale save (Day 3, 18:40; $8,420; REP 6; jobs 1–7 complete). New Game starts the eight scripted jobs across three acts. Job 7 unlocks the drawbridge; reaching the bridge approach in the finale raises its leaves and blocks pursuing units. Cross to the far shore to finish.
 
-## Run
+WASD drive/walk; Shift run; Space handbrake; F enter/exit/steal nearby cars; click fire; 1 pistol; 2 SMG; R reload; C camera; M city atlas; P pause; Shift+M or the music button mute. The brief assigns M to both map and mute; the map uses the unmodified key. Audio starts after a user gesture. Progress, money, REP and garage save locally. Health zero or a sustained police box-in sends you to hospital and costs $500.
 
-```sh
-node serve.ts
-```
+Modules: config (tuning/state), city (geometry/lighting/bridge), player (movement/weapons), traffic (cars/pedestrians), police (pursuit states/helicopter), missions (eight-job progression), HUD, map, audio, and main (orchestration). Vendor files are unchanged. All other code and SVG portraits are original to this build. No external services or assets are required.
 
-Then open http://localhost:8080 in your browser. No build step, no network requests — the game is fully self-contained.
+The four deterministic `?shot=1` through `?shot=4` scenes share the canonical finale state. They render the bridge escape, title/crew, on-foot mission and city atlas. Capture at 1280×720 using headless Chromium. `shots.json` lists them.
 
-## Play
+Package with `mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts`. The output contains game/, screenshots/ and dossier.json. Respray, races and collectibles are map-only activity markers. Boat driving and multiplayer are outside scope.
 
-WASD to drive or walk, SPACE for the handbrake, F to enter or steal a car, mouse click to shoot, 1/2 to switch weapons, R to reload, C to change camera, M to mute, P to pause. The minimap zooms with the mouse wheel. Mission progress, cash, REP and garage saves automatically.
-
-Built for the [make.fun](https://make.fun/?ref=zsk0hsg3&utm_source=github&utm_medium=readme&utm_campaign=gta6-01) gta6-01 bounty.
+Validation in the recording environment: JavaScript syntax, relative imports, geometry construction, driving, enter/exit, shooting/reloading, drawbridge/police blocking, payout and all eight mission transitions pass direct module checks. Browser validation is pending: localhost listen and cached Chromium startup are denied by the sandbox (EPERM). No screenshot images or dossier are fabricated. `/tmp/capture-kilat.cjs` is the fresh Playwright capture/site-check tool; run it in an environment that permits localhost and Chromium, inspect `/tmp/kilat-cover-thumbnail.jpg`, then run the packaging command.

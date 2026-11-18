@@ -1,49 +1,32 @@
-// KILAT BAY: LAST CROSSING — entrypoint for the make.fun gta6-01 bounty.
-// Copies the static game + screenshots into the output directory and writes
-// the dossier the judges read. Node 22, standard library only.
-import { cpSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-import { buildDossier } from "./vendor/makefun-game.ts";
+import { cp, mkdir, writeFile, readdir, rm, stat } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { buildDossier } from './vendor/makefun-game.ts';
 
-// Where the entry lives (this file's directory) and where it must land.
-const ENTRY_ROOT = dirname(fileURLToPath(import.meta.url));
-const OUTPUT_DIR = process.env.MAKEFUN_OUTPUT_DIR || "/output";
-
-// Dossier caps from the bounty kit.
-const DOSSIER_CAPS = {
+// The kit reads this output directory; the source and vendor files stay intact.
+const output = resolve(process.env.MAKEFUN_OUTPUT_DIR || '/output');
+if(output === resolve('.')) throw new Error('Output must be separate from the source repository.');
+const caps = {
   text_max_bytes: 163840,
+  screenshots_max: 4,
+  screenshot_max_bytes: 262144,
   screenshots: { max: 4, max_bytes: 262144 },
   game_max_files: 993,
   game_max_bytes: 50331648,
   game_path_max_bytes: 1000,
 };
-
-function copyTree(name: string): void {
-  const src = join(ENTRY_ROOT, name);
-  const dst = join(OUTPUT_DIR, name);
-  if (!existsSync(src)) {
-    console.warn(`[kilat-bay] warning: ${name}/ not found at ${src}, skipping`);
-    return;
-  }
-  cpSync(src, dst, { recursive: true });
-  console.log(`[kilat-bay] copied ${name}/ -> ${dst}`);
+const expected = ['1-chase.jpg', '2-title.jpg', '3-mission.jpg', '4-map.jpg'];
+await mkdir(output, { recursive: true });
+for(const name of ['game', 'screenshots']) {
+  await rm(resolve(output, name), { recursive: true, force: true });
+  await cp(name, resolve(output, name), { recursive: true });
 }
-
-function main(): void {
-  mkdirSync(OUTPUT_DIR, { recursive: true });
-  copyTree("game");
-  copyTree("screenshots");
-  // Build the dossier from the copied output tree, against the caps.
-  // buildDossier returns the finished dossier bytes — write them raw.
-  const dossier = buildDossier(OUTPUT_DIR, DOSSIER_CAPS);
-  const dossierPath = join(OUTPUT_DIR, "dossier.json");
-  if (typeof dossier === "string" || dossier instanceof Uint8Array) {
-    writeFileSync(dossierPath, dossier);
-  } else {
-    writeFileSync(dossierPath, JSON.stringify(dossier, null, 2) + "\n", "utf8");
-  }
-  console.log(`[kilat-bay] wrote ${dossierPath}`);
+for(const name of expected) {
+  const info = await stat(resolve(output, 'screenshots', name)).catch(() => null);
+  if(!info) throw new Error(`Missing real Chromium capture: screenshots/${name}. Run /tmp/capture-kilat.cjs first.`);
+  if(info.size > caps.screenshot_max_bytes) throw new Error(`${name} exceeds the screenshot byte cap.`);
 }
-
-main();
+const images = await readdir(resolve(output, 'screenshots'));
+if(images.length !== 4) throw new Error('Expected exactly the four canonical screenshots.');
+const dossier = await buildDossier(output, caps);
+await writeFile(resolve(output, 'dossier.json'), dossier);
+console.log(`KILAT BAY packaged: ${output}/game + screenshots + dossier.json`);
